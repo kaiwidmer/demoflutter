@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demoflutter
+  labels:
+    app: demoflutter
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demoflutter
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 33%
+  template:
+    metadata:
+      labels:
+        app: demoflutter
+    spec:
+      containers:
+        - name: demoflutter
+          image: kaiiiiii/<IMAGENAME>
+          ports:
+            - containerPort: 80

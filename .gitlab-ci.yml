@@ -1,9 +1,10 @@
 stages:
     - build
     - containerize
+    - deploy
 
 variables:
-  FLUTTER_VERSION: "https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.2.1-stable.tar.xz"
+  FLUTTER_VERSION: "https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.9.1+hotfix.2-stable.tar.xz"
   CONTAINER_IMAGE: kaiiiiii/${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}
 
 build:
@@ -36,3 +37,16 @@ containerize:
     - docker build -t ${CONTAINER_IMAGE} .
     - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE}
     - docker push ${CONTAINER_IMAGE}
+
+deploy:
+  stage: deploy
+  image: dtzar/helm-kubectl
+  script:
+    - kubectl config set-cluster k8s --server="${SERVER}"
+    - kubectl config set clusters.k8s.certificate-authority-data ${CERTIFICATE_AUTHORITY_DATA}
+    - kubectl config set-credentials gitlab --token="${USER_TOKEN}"
+    - kubectl config set-context default --cluster=k8s --user=gitlab
+    - kubectl config use-context default
+    - sed -i "s/<IMAGENAME>/${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}/g" deployment.yaml
+    - kubectl apply -f deployment.yaml
+    - kubectl apply -f service.yaml
