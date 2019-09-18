@@ -1,3 +1,6 @@
+stages:
+    - build
+    - containerize
 
 variables:
   FLUTTER_VERSION: "https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.2.1-stable.tar.xz"
@@ -5,7 +8,7 @@ variables:
 
 build:
   image: openjdk:8-jdk
-  sage: build
+  stage: build
   script:
     - pt-get --quiet update --yes  
     - apt-get --quiet install --yes wget tar unzip
