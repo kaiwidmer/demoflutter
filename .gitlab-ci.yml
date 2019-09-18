@@ -10,7 +10,7 @@ build:
   image: openjdk:8-jdk
   stage: build
   script:
-    - pt-get --quiet update --yes  
+    - apt-get --quiet update --yes  
     - apt-get --quiet install --yes wget tar unzip
     - wget --output-document=flutter-sdk.tar.xz ${FLUTTER_VERSION}
     - tar -xf flutter-sdk.tar.xz  
