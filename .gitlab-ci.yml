@@ -1,0 +1,35 @@
+
+variables:
+  FLUTTER_VERSION: "https://storage.googleapis.com/flutter_infra/releases/stable/linux/flutter_linux_v1.2.1-stable.tar.xz"
+  CONTAINER_IMAGE: kaiiiiii/${CI_PROJECT_NAME}:${CI_COMMIT_SHORT_SHA}
+
+build:
+  image: openjdk:8-jdk
+  sage: build
+  script:
+    - pt-get --quiet update --yes  
+    - apt-get --quiet install --yes wget tar unzip
+    - wget --output-document=flutter-sdk.tar.xz ${FLUTTER_VERSION}
+    - tar -xf flutter-sdk.tar.xz  
+    - export PATH=$PATH:$PWD/flutter/bin
+    - flutter channel master
+    - flutter upgrade
+    - flutter config --enable-web
+    - flutter create .
+    - flutter build web
+  artifacts:
+    paths:
+      - build/web
+
+containerize:
+  image: docker:latest
+  services:
+  - docker:dind
+  stage: containerize
+  tags:
+    - docker
+  script:
+    - docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+    - docker build -t ${CONTAINER_IMAGE} .
+    - docker tag ${CONTAINER_IMAGE} ${CONTAINER_IMAGE}
+    - docker push ${CONTAINER_IMAGE}
